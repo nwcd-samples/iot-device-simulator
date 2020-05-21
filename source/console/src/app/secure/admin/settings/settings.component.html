@@ -1,0 +1,178 @@
+<!-- ============================================================== -->
+<!-- Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+        <h3 id="view-title">系统设置</h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/securehome">首页</a></li>
+            <li class="breadcrumb-item">配置</li>
+        </ol>
+    </div>
+    <div class="col-md-7 col-4 align-self-center">
+        <div class="d-flex m-t-10 justify-content-end">
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>设备</small></h6>
+                    <h4 class="m-t-0 text-success">总数 {{deviceStats.total}} </h4></div>
+            </div>
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>仿真</small></h6>
+                    <h4 class="m-t-0 text-success-alt">{{deviceStats.simulations}} 正在运行</h4></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- End Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<!-- Row -->
+<div class="row" *ngIf="isAdminUser">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body p-b-0">
+                <h4 class="card-title">配置</h4>
+                <h6 class="card-subtitle">配置参数，用于一般应用，仿真引擎及汽车模拟。</h6> </div>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs customtab" role="tablist">
+                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#general" role="tab"><span class="hidden-sm-up"><i class="ti-home"></i></span> <span class="hidden-xs-down">通用</span></a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#simengine" role="tab"><span class="hidden-sm-up"><i class="ti-user"></i></span> <span class="hidden-xs-down">模拟器引擎</span></a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#auto" role="tab"><span class="hidden-sm-up"><i class="ti-email"></i></span> <span class="hidden-xs-down">汽车</span></a> </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div class="tab-pane p-20 active" id="general" role="tabpanel">
+                    <div class="alert alert-danger" *ngIf="appConfigError">
+                        <h3 class="text-danger"><i class="fa fa-exclamation-circle"></i> Oops!</h3> 无法加载常规应用程序设置。
+                    </div>
+                    <form class="fm-t-40" *ngIf="!appConfigError">
+                        <div class="form-group">
+                            <label>Mapbox Token</label>
+                            <input type="text" class="form-control form-control-line" name="mapboxToken" id="mapboxToken" #mapboxToken="ngModel" [(ngModel)]="appConfig.setting.mapboxToken" required ngModel />
+                            <div class="form-control-feedback">
+                                <small>Mapbox令牌用于显示汽车模块的地图，请在 /console/appsets/appVariables.js 文件中修改 Mapbox Token 值，否则汽车模拟中的地图无法显示。申请 Mapbox token, 请参考 https://www.mapbox.com/ </small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>IoT 设备模拟器API Gateway 端点</label>
+                            <input type="text" class="form-control form-control-line" name="apiEndpoint" id="apiEndpoint" #apiEndpoint="ngModel" [(ngModel)]="appConfig.setting.apiEndpoint" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>IoT设备模拟器API的安全端点。</small>
+                            </div>
+                        </div>
+                        <!-- <div class="form-group">
+                            <label>Congito User Pool Id</label>
+                            <input type="text" class="form-control form-control-line" name="idp" id="idp" #idp="ngModel" [(ngModel)]="appConfig.setting.idp" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>The unique identifier for the Amazon Cognito User Pool.</small>
+                            </div>
+                        </div> -->
+                        <div class="form-group">
+                            <label>本次安装部署 UUID</label>
+                            <input type="text" class="form-control form-control-line" name="uuid" id="uuid" #uuid="ngModel" [(ngModel)]="appConfig.setting.uuid" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>每次安装部署的唯一标识符。</small>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-success-alt btn-rounded m-r-15" (click)="save(appConfig)">保存</button>
+                            <button type="button" class="btn btn-secondary btn-rounded" (click)="cancel()">取消</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="simengine" role="tabpanel">
+                    <div class="alert alert-danger" *ngIf="simEngineConfigError">
+                        <h3 class="text-danger"><i class="fa fa-exclamation-circle"></i> Oops!</h3> 无法加载模拟引擎设置。
+                    </div>
+                    <form class="fm-t-40" *ngIf="!simEngineConfigError">
+                        <div class="form-group">
+                            <label>当前使用 AWS IoT 区域</label>
+                            <!-- <input type="text" class="form-control form-control-line" name="targetIotRegion" id="targetIotRegion" #targetIotRegion="ngModel" [(ngModel)]="simEngineConfig.setting.targetIotRegion" required ngModel readonly /> -->
+                            <select class="custom-select col-12" name="targetIotRegion" id="targetIotRegion" #targetIotRegion="ngModel" [(ngModel)]="simEngineConfig.setting.targetIotRegion" required ngModel disabled>
+                                <option value="us-east-1">cn-north-1</option>
+                                <option value="us-east-2">cn-northwest-1</option>
+                            </select>
+                            <div class="form-control-feedback">
+                                <small>仿真引擎将发布生成数据的区域。</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>日志级别</label>
+                            <!-- <input type="text" class="form-control form-control-line" name="loggingLevel" id="loggingLevel" #loggingLevel="ngModel" [(ngModel)]="simEngineConfig.setting.loggingLevel" required ngModel readonly /> -->
+                            <select class="custom-select col-12" name="loggingLevel" id="loggingLevel" #loggingLevel="ngModel" [(ngModel)]="simEngineConfig.setting.loggingLevel" required ngModel>
+                                <option value="1">INFO</option>
+                                <option value="2">ROBUST</option>
+                                <option value="3">DEBUG</option>
+                            </select>
+                            <div class="form-control-feedback">
+                                <small>模拟器日志发送到 Cloud Watch 的日志记录级别。</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>设备队列URL</label>
+                            <input type="text" class="form-control form-control-line" name="deviceQueueUrl" id="deviceQueueUrl" #deviceQueueUrl="ngModel" [(ngModel)]="simEngineConfig.setting.deviceQueueUrl" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>用于设备状态请求的Amazon SQS队列的URL。</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>设备表</label>
+                            <input type="text" class="form-control form-control-line" name="deviceTable" id="deviceTable" #deviceTable="ngModel" [(ngModel)]="simEngineConfig.setting.deviceTable" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>Amazon DynamoDB表用于记录设备。</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>设备类型表</label>
+                            <input type="text" class="form-control form-control-line" name="deviceTypeTable" id="deviceTypeTable" #deviceTypeTable="ngModel" [(ngModel)]="simEngineConfig.setting.deviceTypeTable" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>Amazon DynamoDB表用于记录设备类型定义.</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>数据指标表</label>
+                            <input type="text" class="form-control form-control-line" name="metricsTable" id="metricsTable" #metricsTable="ngModel" [(ngModel)]="simEngineConfig.setting.metricsTable" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>Amazon DynamoDB表用于保留指标类型定义。</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>队列轮询间隔</label>
+                            <input type="text" class="form-control form-control-line" name="queuePollerInterval" id="queuePollerInterval" #queuePollerInterval="ngModel" [(ngModel)]="simEngineConfig.setting.queuePollerInterval" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>Amazon SQS 设备队列模拟引擎的轮询间隔时间（毫秒）。</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>内存清理时间间隔</label>
+                            <input type="text" class="form-control form-control-line" name="garbageCollectionInterval" id="garbageCollectionInterval" #garbageCollectionInterval="ngModel" [(ngModel)]="simEngineConfig.setting.garbageCollectionInterval" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>仿真引擎将从内存中清除“已停止”设备的间隔时间（毫秒）。</small>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-success-alt btn-rounded m-r-15" (click)="save(simEngineConfig)">保存</button>
+                            <button type="button" class="btn btn-secondary btn-rounded" (click)="cancel(simEngineConfig)">取消</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="auto" role="tabpanel">
+                    <div class="alert alert-danger" *ngIf="autoConfigError">
+                        <h3 class="text-danger"><i class="fa fa-exclamation-circle"></i> Oops!</h3> 无法加载汽车模块设置.
+                    </div>
+                    <form class="fm-t-40" *ngIf="!autoConfigError">
+                        <div class="form-group">
+                            <label>行程 S3 Bucket</label>
+                            <input type="text" class="form-control form-control-line" name="routeBucket" id="routeBucket" #routeBucket="ngModel" [(ngModel)]="autoConfig.setting.routeBucket" required ngModel readonly />
+                            <div class="form-control-feedback">
+                                <small>存储预先配置的路线和完整的模拟路线GeoJSON的Amazon S3存储桶。</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->

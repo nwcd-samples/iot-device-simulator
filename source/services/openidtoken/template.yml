@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Local test version of the profile microservice.
+
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters:
+  AuthingAppSecretParamter:
+    Type: String
+    Default: '****'
+  AuthingRedirectURLParameter:
+    Type: String
+    Default: 'http://aws-oidc-authing-demo-codeflow.s3-website.cn-northwest-1.amazonaws.com.cn/'
+  AuthingAppURLParameter : 
+    Type: String
+    Default: 'aws-oidc-authing-demo-codeflow'
+  AuthingAppIDParameter :
+    Type: String
+    Default: '****'
+
+Resources:
+
+  OpenidtokenService:
+    Type: AWS::Serverless::Function 
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          Authing_App_URL : TMP
+          AuthingAppId :  TMP
+          AuthingAppSecret: TMP
+          AUTHING_APPREDIRECTURL: TMP
+      Events:
+          GetProfile:
+              Type: Api
+              Properties:
+                  Path: /openidtoken
+                  Method: ANY

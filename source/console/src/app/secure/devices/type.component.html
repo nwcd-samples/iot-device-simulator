@@ -1,0 +1,372 @@
+<!-- ============================================================== -->
+<!-- Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+        <h3 id="view-title">{{title}}</h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/securehome">首页</a></li>
+            <li class="breadcrumb-item"><a href="/securehome/types">设备类型</a></li>
+            <li class="breadcrumb-item active">{{typeId}}</li>
+        </ol>
+    </div>
+    <div class="col-md-7 col-4 align-self-center">
+        <div class="d-flex m-t-10 justify-content-end">
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>设备</small></h6>
+                    <h4 class="m-t-0 text-success">总数 {{deviceStats.total}} </h4></div>
+            </div>
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>仿真</small></h6>
+                    <h4 class="m-t-0 text-success-alt">{{deviceStats.simulations}} 运行中</h4></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- End Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <span>设备类型定义</span>
+                    <span style="text-transform: uppercase;" [class]="dtype.visibility === 'shared' ? 'label label-light-success-alt pull-right' : 'label label-light-danger pull-right'">{{dtype.visibility}}</span>
+                    <span *ngIf="readOnly" style="text-transform: uppercase; margin-right: 10px;" class="label label-light-danger pull-right">READONLY</span>
+                </h4>
+                <h6 class="card-subtitle">定义设备的数据如何上传至AWS IoT.</h6>
+                <form class="fm-t-40">
+                    <div class="form-group">
+                        <label>设备类型名称</label>
+                        <input type="text" class="form-control form-control-line" name="typename" id="typename" #typename="ngModel" [(ngModel)]="dtype.name" required ngModel [readonly]="this.typeId !== 'new'" />
+                        <div class="form-control-feedback">
+                            <small>设备类型的名称</small>
+                        </div>
+                    </div>
+                    <div class="form-group" *ngIf="!readOnly" hidden=true>
+                        <label for="visibility" class="form-control-label">Visibility:</label>
+                        <select class="custom-select col-12" name="visibility" id="visibility" #visibility="ngModel" [(ngModel)]="dtype.visibility" required ngModel [disabled]="dtype.visibility === 'shared'">
+                            <option value="private">PRIVATE</option>
+                            <option value="shared">SHARED</option>
+                        </select>
+                        <div class="form-control-feedback">
+                            <small>The visibility of device type. Selecting "Shared" allows members to use this device type in simulations.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>消息主题</label>
+                        <input type="text" class="form-control form-control-line" name="topic" id="topic" #topic="ngModel" [(ngModel)]="dtype.spec.topic" required ngModel [readonly]="readOnly" />
+                        <div class="form-control-feedback">
+                            <small>数据上传的IoT消息主题</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>数据传输时长</label>
+                        <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="duration" id="duration" #duration="ngModel" [(ngModel)]="dtype.spec.duration" required ngModel [readonly]="readOnly" />
+                        <div class="form-control-feedback">
+                            <small>指定设备在一次仿真运行中发送数据至IoT消息主题的时长(毫秒)[需要大于60000].</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>数据传输间隔</label>
+                        <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="interval" id="interval" #interval="ngModel" [(ngModel)]="dtype.spec.interval" required ngModel [readonly]="readOnly" />
+                        <div class="form-control-feedback">
+                            <small>指定设备在一次仿真运行中发送数据的间隔时间(毫秒)[需要大于1000].</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label style='margin-bottom:1px;'>消息负载</label>
+                        <div class="form-control-feedback">
+                            <small>定义设备发送的消息负载的格式</small>
+                        </div>
+                        <!-- .modal -->
+                        <div class="modal fade" id="attributeModal" tabindex="-1" role="dialog" aria-labelledby="attributeModalLabel1">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="exampleModalLabel1">消息属性</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form name="attributeForm" #f="ngForm" class="form-control-line" (ngSubmit)="addAttribute(f.value)" novalidate>
+                                            <div [class]="(name.dirty || name.touched) ? (name.invalid ? 'form-group has-danger' :'form-group has-success-alt') : 'form-group'">
+                                                <label for="name" class="form-control-label">属性名称:</label>
+                                                <input type="text" [class]="(name.dirty || name.touched) ? (name.invalid ? 'form-control form-control-line form-control-danger' : 'form-control form-control-line form-control-success-alt') : 'form-control form-control-line'" name="name" id="name" #name="ngModel" [(ngModel)]="attribute.name" required ngModel>
+                                                <div *ngIf="!((name.invalid && (name.dirty || name.touched)) && name.errors.required)" class="form-control-feedback">
+                                                    <small>消息属性名称.</small>
+                                                </div>
+                                                <div *ngIf="(name.invalid && (name.dirty || name.touched)) && name.errors.required" class="form-control-feedback">
+                                                    <small>消息属性名称必须要提供.</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="type" class="form-control-label">属性数据类型:</label>
+                                                <select class="custom-select col-12" name="type" id="type" #type="ngModel" [(ngModel)]="attribute.type" required ngModel>
+                                                    <option value="id">DEVICE ID</option>
+                                                    <option value="bool">BOOLEAN</option>
+                                                    <option value="decay">DECAY</option>
+                                                    <option value="float">FLOAT</option>
+                                                    <option value="int">INTEGER</option>
+                                                    <option value="location">LOCATION</option>
+                                                    <option *ngIf="nestedDepth < 3" value="object">OBJECT</option>
+                                                    <option value="string">STRING</option>
+                                                    <option value="sinusoidal">SINUSOIDAL</option>
+                                                    <option value="uuid">UNIQUE IDENTIFIER</option>
+                                                    <option value="shortid">UNIQUE SHORT IDENTIFIER</option>
+                                                    <option value="timestamp">UTC TIMESTAMP</option>
+                                                    <option value="pickOne">PICK ONE FROM ARRAY</option>
+                                                </select>
+                                                <div class="form-control-feedback">
+                                                    <small>消息属性数据类型.</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'location'" class="form-group">
+                                                <label for="smin" class="form-control-label">Center position latitude:</label>
+                                                <input type="number" class="form-control form-control-line" name="lat" id="lat" #lat="ngModel" [(ngModel)]="attribute.lat" required ngModel min="-90" max="90">
+                                                <div class="form-control-feedback">
+                                                    <small> 维度坐标的位置随机生成。</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'location'" class="form-group">
+                                                <label for="smax" class="form-control-label">Center position longitude:</label>
+                                                <input type="number" class="form-control form-control-line" name="long" id="long" #long="ngModel" [(ngModel)]="attribute.long" required ngModel min="-180" max="180">
+                                                <div class="form-control-feedback">
+                                                    <small>经度坐标的位置随机生成。.</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'location'" class="form-group">
+                                                <label for="smin" class="form-control-label">Radius:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="radius" id="radius" #radius="ngModel" [(ngModel)]="attribute.radius" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>要生成的随机坐标的中心位置的半径(以米为单位)。</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'pickOne'" class="form-group">
+                                                <label for="smin" class="form-control-label">Array:</label>
+                                                <input type="text" class="form-control form-control-line" name="arr" id="arr" #arr="ngModel" [(ngModel)]="attribute.arr" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>从值数组中随机选择一个值。(逗号分隔值)</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'string'" class="form-group">
+                                                <label for="smin" class="form-control-label">String minimum length:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="smin" id="smin" #smin="ngModel" [(ngModel)]="attribute.smin" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>随机生成的字符串最小长度。</small>
+                                                </div>
+                                                <div class="alert alert-danger" *ngIf="stringMinError">
+                                                    字符串的最小长度必须小于字符串的最大长度。
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'string'" class="form-group">
+                                                <label for="smax" class="form-control-label">字符串最大长度:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="smax" id="smax" #smax="ngModel" [(ngModel)]="attribute.smax" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>生成的随机字符串的最大长度.</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'bool'" class="form-group">
+                                                <label for="bmin" class="form-control-label">Boolean minimum:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="bmin" id="bmin" #bmin="ngModel" [(ngModel)]="attribute.bmin" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>随机生成的字符串的最大长度。.</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'bool'" class="form-group">
+                                                <label for="bmax" class="form-control-label">Boolean maximum:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="bmax" id="bmax" #bmax="ngModel" [(ngModel)]="attribute.bmax" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>生成的随机布尔值的最大值范围。</small>
+                                                </div>
+                                                <div class="alert alert-danger" *ngIf="boolMinError">
+                                                    布尔值最小长度必须小于布尔值最大长度。
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'bool'" class="form-group">
+                                                <label for="bseed" class="form-control-label">布尔值种子:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="bseed" id="bseed" #bseed="ngModel" [(ngModel)]="attribute.bseed" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>生成的随机布尔值的种子.</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'int' || attribute.type === 'decay' || attribute.type === 'sinusoidal'" class="form-group">
+                                                <label for="intmin" class="form-control-label">最小值:</label>
+                                                <input type="number" class="form-control form-control-line" name="min" id="min" #min="ngModel" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 45' [(ngModel)]="attribute.min" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small *ngIf="attribute.type === 'int'">生成的随机整数的最小值。</small>
+                                                    <small *ngIf="attribute.type === 'sinusoidal'">正弦曲线的底数。</small>
+                                                    <small *ngIf="attribute.type === 'decay'">衰变的下限。</small>
+                                                </div>                                                
+                                            </div>
+                                            <div *ngIf="attribute.type === 'int' || attribute.type === 'decay' || attribute.type === 'sinusoidal'" class="form-group">
+                                                <label for="intmax" class="form-control-label">最大值:</label>
+                                                <input type="number" class="form-control form-control-line" name="max" id="max" #max="ngModel" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 45' [(ngModel)]="attribute.max" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small *ngIf="attribute.type === 'int'">生成的随机整数的最大值。</small>
+                                                    <small *ngIf="attribute.type === 'sinusoidal'">正弦曲线的上限(起始点)。</small>
+                                                    <small *ngIf="attribute.type === 'decay'">衰减的上限(起点)。</small>                                                
+                                                </div>
+                                                <div class="alert alert-danger" *ngIf="intMinError">
+                                                    最小值必须小于最大值
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'shortid' || attribute.type === 'string' || attribute.type === 'uuid' || attribute.type === 'pickOne'" class="form-group">
+                                                <label for="static" class="form-control-label">Static:</label>
+                                                <select class="custom-select col-12" name="static" id="static" #static="ngModel" [(ngModel)]="attribute.static" required ngModel>
+                                                    <option value="true">true</option>
+                                                    <option value="false">false</option>
+                                                </select>
+                                                <div class="form-control-feedback">
+                                                    <small>每次仿真是否仅生成一次数据值？</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'timestamp'" class="form-group">
+                                                <label for="tsformat" class="form-control-label">Timestamp Format:</label>
+                                                <select class="custom-select col-12" name="tsformat" id="tsformat" #tsformat="ngModel" [(ngModel)]="attribute.tsformat" required ngModel>
+                                                    <option value="default">默认值 (YYYY-MM-DDTHH:mm:ss)</option>
+                                                    <option value="unix">Unix</option>
+                                                </select>
+                                                <div class="form-control-feedback">
+                                                    <small>有效载荷中发送的时间戳格式</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'float'" class="form-group">
+                                                <label for="precision" class="form-control-label">Float precision:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="precision" id="precision" #precision="ngModel" [(ngModel)]="attribute.precision" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>浮点值的精度。</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'float'" class="form-group">
+                                                <label for="imin" class="form-control-label">整数型最小值:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 45' name="imin" id="imin" #imin="ngModel" [(ngModel)]="attribute.imin" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>整数精度的最小值。</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'float'" class="form-group">
+                                                <label for="imax" class="form-control-label">整数型最大值:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 45' name="imax" id="imax" #dmax="ngModel" [(ngModel)]="attribute.imax" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>整数精度的最大值。</small>
+                                                </div>
+                                                <div class="alert alert-danger" *ngIf="floatIntMinError">
+                                                    最小整数值必须小于最大整数值。
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'float'" class="form-group">
+                                                <label for="dmin" class="form-control-label">十进制小数精度最小值:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="dmin" id="dmin" #dmin="ngModel" [(ngModel)]="attribute.dmin" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>十进制精度小数的最小值。</small>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type === 'float'" class="form-group">
+                                                <label for="dmax" class="form-control-label">十进制小数精度最大值:</label>
+                                                <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="dmax" id="dmax" #dmax="ngModel" [(ngModel)]="attribute.dmax" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>十进制精度小数的最大值。</small>
+                                                </div>
+                                                <div class="alert alert-danger" *ngIf="floatDecMinError">
+                                                    最小的十进制值必须小于最大的十进制值。
+                                                </div>
+                                            </div>
+                                            <div *ngIf="attribute.type !== 'rstring' && attribute.type !== 'location' && attribute.type !== 'pickOne' && attribute.type !== 'id' && attribute.type !== 'object'" class="form-group">
+                                                <label for="default" class="form-control-label">Default Value (Optional):</label>
+                                                <input type="text" class="form-control form-control-line" name="default" id="default" #default="ngModel" [(ngModel)]="attribute.default" required ngModel>
+                                                <div class="form-control-feedback">
+                                                    <small>默认值将始终是与此属性一起发送的值。</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" (click)="cancelAddAttribute(f);">取消</button>
+                                                <button type="submit" class="btn btn-success" >提交</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .modal -->
+                        <div class="table-responsive m-t-20">
+                            <div class="row" style="margin-left: 0px; margin-right: 0px;">
+                                <div class="col-md-5 b-b" style="font-weight: 400;color: #99abb4; text-transform:uppercase; padding: .75rem;">消息属性</div>
+                                <div class="col-md-2 b-b" style="font-weight: 400;color: #99abb4; text-transform:uppercase; padding: .75rem;">数据类型</div>
+                                <div class="col-md-2 b-b" style="font-weight: 400;color: #99abb4; text-transform:uppercase; padding: .75rem;">静态数值</div>
+                                <div class="col-md-3 b-b" style="font-weight: 400;color: #99abb4; text-transform:uppercase; padding: .75rem; text-align: right; padding-right:30px;">Actions</div>
+                            </div>
+                            <div class="row" style="margin-left: 0px; margin-right: 0px;" *ngFor="let item of dtype.spec.payload">
+                                <div class="col-md-5 b-b" style="font-weight: 400;color: #455a64; font-weight: 500; text-transform:uppercase; padding: .75rem; text-transform: none;">{{item.name}}</div>
+                                <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{item.type}}</div>
+                                <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{item.static}}</div>
+                                <div class="col-md-3 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">   
+                                    <div class="pull-right" role="group">                                                         
+                                        <button *ngIf="item.type !== 'object'" type="button" class="btn btn-success btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="viewSchemaAttribute(item._id_)"><i class="mdi mdi-information"></i> 查看配置</button>
+                                        <button *ngIf="item.type === 'object' && !readOnly" type="button" class="btn btn-success-alt btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="addSchemaAttribute(item, 1)"><i class="mdi mdi-plus"></i>增加属性</button>
+                                        <button *ngIf="!readOnly" type="button" class="btn btn-danger btn-sm m-r-15" data-toggle="tooltip" title="Delete Attribute" (click)="removeSchemaAttribute(item._id_)"><i class="mdi mdi-delete-circle"></i> 删除</button>
+                                    </div>
+                                </div>
+                                <div *ngIf="item.type === 'object'" class="col-md-12">
+                                    <div class="row" *ngFor="let i of item.payload">
+                                        <div class="col-md-5 b-b" style="font-weight: 400;color: #455a64; font-weight: 500; text-transform:uppercase; padding: .75rem; border-left: 15px solid #60c84c; text-transform: none;">{{i.name}}</div>
+                                        <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{i.type}}</div>
+                                        <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{i.static}}</div>
+                                        <div class="col-md-3 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">   
+                                            <div class="pull-right" role="group">                                                         
+                                                <button *ngIf="i.type !== 'object'" type="button" class="btn btn-success btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="viewSchemaAttribute(i._id_)"><i class="mdi mdi-information"></i> 查看配置</button>
+                                                <button *ngIf="i.type === 'object' && !readOnly" type="button" class="btn btn-success-alt btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="addSchemaAttribute(i, 2)"><i class="mdi mdi-plus"></i> 增加属性</button>
+                                                <button *ngIf="!readOnly" type="button" class="btn btn-danger btn-sm m-r-15" data-toggle="tooltip" title="Delete Attribute" (click)="removeSchemaAttribute(i._id_)"><i class="mdi mdi-delete-circle"></i> 删除</button>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="i.type === 'object'" class="col-md-12">
+                                            <div class="row" *ngFor="let k of i.payload">
+                                                <div class="col-md-5 b-b" style="font-weight: 400;color: #455a64; font-weight: 500; text-transform:uppercase; padding: .75rem; border-left: 15px solid #60c84c; margin-left: 15px; margin-right: -15px; text-transform: none;">{{k.name}}</div>
+                                                <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{k.type}}</div>
+                                                <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{k.static}}</div>
+                                                <div class="col-md-3 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">   
+                                                    <div class="pull-right" role="group">                                                         
+                                                        <button *ngIf="k.type !== 'object'" type="button" class="btn btn-success btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="viewSchemaAttribute(k._id_)"><i class="mdi mdi-information"></i> 查看配置</button>
+                                                        <button *ngIf="k.type === 'object' && !readOnly" type="button" class="btn btn-success-alt btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="addSchemaAttribute(k, 3)"><i class="mdi mdi-plus"></i> 增加属性</button>
+                                                        <button *ngIf="!readOnly" type="button" class="btn btn-danger btn-sm m-r-15" data-toggle="tooltip" title="Delete Attribute" (click)="removeSchemaAttribute(k._id_)"><i class="mdi mdi-delete-circle"></i> 删除</button>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="k.type === 'object'" class="col-md-12">
+                                                    <div class="row" *ngFor="let j of k.payload">
+                                                        <div class="col-md-5 b-b" style="font-weight: 400;color: #455a64; font-weight: 500; text-transform:uppercase; padding: .75rem; border-left: 15px solid #60c84c; margin-left: 30px; margin-right: -30px; text-transform: none;">{{j.name}}</div>
+                                                        <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{j.type}}</div>
+                                                        <div class="col-md-2 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">{{j.static}}</div>
+                                                        <div class="col-md-3 b-b" style="font-weight: 400;color: #67757c; text-transform:uppercase; padding: .75rem;">   
+                                                            <div class="pull-right" role="group">                                                         
+                                                                <button type="button" class="btn btn-success btn-sm m-r-15" data-toggle="tooltip" title="View Attribute" (click)="viewSchemaAttribute(j._id_)"><i class="mdi mdi-information"></i> 查看配置</button>
+                                                                <button *ngIf="!readOnly" type="button" class="btn btn-danger btn-sm m-r-15" data-toggle="tooltip" title="Delete Attribute" (click)="removeSchemaAttribute(j._id_)"><i class="mdi mdi-delete-circle"></i> 删除</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button *ngIf="!readOnly" type="button" class="btn btn-success btn-sm m-t-20" (click)="addSchemaAttribute(null, 0)" ><i class="mdi mdi-plus"></i> 增加属性</button>
+                    </div>
+                    <div>
+                        <label>示例消息负载</label>
+                    </div>
+                    <pre style="font-size: 14px;">{{getDataSample()}}</pre>
+                    <div class="m-t-20 m-b-20">
+                        <button *ngIf="!readOnly" type="button" class="btn btn-success-alt btn-rounded m-r-15" (click)="saveDeviceType()">保存</button>
+                        <button type="button" class="btn btn-secondary btn-rounded" (click)="cancel()">取消</button>
+                    </div>
+                    <div *ngIf="hasError" class="alert alert-danger alert-rounded"> <i class="mdi mdi-exclamation"></i> {{errorMsg}}</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->

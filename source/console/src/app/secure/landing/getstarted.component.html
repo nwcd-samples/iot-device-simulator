@@ -1,0 +1,90 @@
+<!-- ============================================================== -->
+<!-- Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<div class="row" style="background-color:#455a64; margin-left:-30px; margin-right:-30px; margin-bottom: 30px;">
+    <div class="col-md-7 col-7" style="padding:40px;">
+        <h6 style="color:#fff; text-transform: uppercase;">仿真</h6>
+        <h1 style="color:#fff;">IoT设备仿真平台</h1>
+        <h3 style="color:#fff; font-weight:100; font-size:26px;">进行IoT应用测试的虚拟设备仿真解决方案</h3>
+        <p style="color:#fff;">
+            IoT仿真平台可以帮助你轻松创建虚拟设备来对IoT应用进行测试，可以收集、处理和分析联网设备产生的数据
+        </p>
+    </div>
+    <div class="col-lg-4 col-md-4" style="padding:40px;">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title m-b-20">我的设备总数</h2>
+                <h5 class="m-b-20" style="font-size:50px;">{{deviceStats.total}}</h5>
+                <button type="button" class="btn btn-success m-r-15 m-b-20" data-toggle="tooltip" title="Create a Device Type" (click)="navTo('/securehome/types/new')">创建新的设备类型</button>
+                <button type="button" class="btn btn-success m-r-15 m-b-20" data-toggle="tooltip" title="Create a Device Type" (click)="navTo('/securehome/general')">创建设备</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row -->
+<div class="row">
+    <!-- Column -->
+    <div class="col-md-7 col-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title m-b-20">功能与优势</h2>
+                <div class="row">
+                    <div class="col-md-6 col-6 b-r">
+                        <h5>通过交互式界面快速进行IoT实验</h5>
+                        <p>
+                            通过交互式界面快速构建功能强大的IoT应用进行实验，避免集成设备或维护大量设备所带来的初始工作量
+                        </p>
+                    </div>
+                    <div class="col-md-6 col-6">
+                        <h5>易于使用的用户界面</h5>
+                        <p>
+                            通过Web界面定义设备模板并轻松部署数百个IoT虚拟设备
+                        </p>
+                    </div>
+                </div>
+                <div class="row m-t-20">
+                    <div class="col-md-6 col-6 b-r">
+                        <h5>监控与观测</h5>
+                        <p>
+                            一旦设备开始仿真运行并发送数据，你可以从仿真控制台监控每个设备，或从后端服务观测仿真平台发送的数据是如何被处理的
+                        </p>
+                    </div>
+                    <div class="col-md-6 col-6">
+                        <h5>开箱即用，或进行定制化</h5>
+                        <p>
+                            这个方案是开箱即用的，可以运行在你的AWS帐号中，或者可以基于这个平台定制化一个符合你独特业务需求的仿真引擎
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4" style="padding:40px; margin-top:-100px;">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title m-b-20">文档</h2>
+                <p><a href="https://aws.amazon.com/answers/iot/iot-device-simulator/">解决方案概览</a></p>
+                <p><a href="https://s3.amazonaws.com/solutions-reference/iot-device-simulator/latest/iot-device-simulator.pdf">方案部署手册</a></p>
+                <p><a href="https://github.com/awslabs/iot-device-simulator">GitHub 代码仓库</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row -->
+<div class="row" style="margin-top:-20px;">
+    <!-- Column -->
+    <div class="col-md-7 col-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title m-b-20">开始使用</h2>
+                <div class="row">
+                    <div class="col-md-12 col-12">
+                        <img src="assets/img/iot-ds.png" width="100%" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

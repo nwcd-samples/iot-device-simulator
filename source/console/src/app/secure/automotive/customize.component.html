@@ -1,0 +1,163 @@
+<!-- ============================================================== -->
+<!-- Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+        <h3 id="view-title">汽车配置</h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/securehome">Home</a></li>
+            <li class="breadcrumb-item"><a href="/securehome/automotive">汽车</a></li>
+            <li class="breadcrumb-item active">配置</li>
+        </ol>
+    </div>
+    <div class="col-md-7 col-4 align-self-center">
+        <div class="d-flex m-t-10 justify-content-end">
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>设备</small></h6>
+                    <h4 class="m-t-0 text-success">共 {{deviceStats.total}} </h4></div>
+            </div>
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>模拟器</small></h6>
+                    <h4 class="m-t-0 text-success-alt">{{deviceStats.simulations}} 运行</h4></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- End Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- <div class="switch pull-right">
+                    <label>Disabled<input type="checkbox" checked [(ngModel)]="config.spec.sendTelemetryData" [ngModelOptions]="{standalone: true}"><span class="lever"></span>Enabled</label>
+                </div> -->
+                <h4 class="card-title">独立遥测传感器数据</h4>
+                <h6 class="card-subtitle">自定义单个模拟遥测传感器数据如何发送到AWS IoT。</h6>
+                <form class="fm-t-40">
+                    <div class="form-group">·
+                        <label>遥测数据主题</label>
+                        <input type="text" class="form-control form-control-line" [disabled]="!config.spec.sendTelemetryData" name="dataTopic" id="dataTopic" required ngModel #dataTopic="ngModel" [(ngModel)]="config.spec.dataTopic"/>
+                        <div class="form-control-feedback">
+                            <small>发送单个传感器数据的主题。 <i>注意：“车辆识别号”附加到该主题。 （例如，联网汽车/遥测/ SAMPLEVIN1234）</i></small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>传感器数据传输时间间隔</label>
+                        <input type="text" class="form-control form-control-line" [disabled]="!config.spec.sendTelemetryData" name="measurementPollerInterval" id="measurementPollerInterval" required ngModel #measurementPollerInterval="ngModel" [(ngModel)]="config.spec.measurementPollerInterval"/>
+                        <div class="form-control-feedback">
+                            <small>发送单个传感器数据的频率（毫秒）。</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>消息格式</label>
+                        <div class="row m-t-10" *ngFor="let item of config.spec.telemetrySchema">
+                            <div class="col-lg-5">
+                                <input type="text" class="form-control" [disabled]="true" [(ngModel)]="item.attribute" name="{{'attr_' + item.attribute}}" ngModel/>
+                            </div>
+                            <div class="col-lg-5">
+                                <select class="custom-select col-12" [disabled]="true" [(ngModel)]="item.value" name="{{'attr_' + item.attribute + '_val'}}" ngModel>
+                                    <option value="measurement_name">度量名称</option>
+                                    <option value="measurement_value">度量值</option>
+                                    <option value="vin">车辆识别号 VIN</option>
+                                    <option value="trip_id">行程 ID</option>
+                                    <option value="timestamp">UTC  时间戳</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <button type="button" class="btn btn-danger btn-sm m-r-15" (click)="removeSchemaAttribute(item.attribute, sensor)" *ngIf="false">移除</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success btn-sm m-t-20" (click)="addSchemaAttribute(sensor)" *ngIf="false">增加属性</button>
+                    </div>
+                    <div>
+                        <label>简单消息载荷</label>
+                    </div>
+                    <pre style="font-size:14px;">{{getDataSample('sensor')}}</pre>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- <div class="switch pull-right">
+                    <label>Disabled<input type="checkbox" checked [(ngModel)]="config.spec.sendAggregatedData" [ngModelOptions]="{standalone: true}"><span class="lever"></span>Enabled</label>
+                </div> -->
+                <h4 class="card-title">遥测数据汇总</h4>
+                <h6 class="card-subtitle">自定义聚合的模拟遥测传感器数据如何发送到AWS IoT。</h6>
+                <form class="fm-t-40">
+                    <div class="form-group">
+                        <label>遥测数据汇总主题</label>
+                        <input type="text" class="form-control form-control-line" [disabled]="!config.spec.sendAggregatedData" name="dataAggregatedTopic" id="dataAggregatedTopic" required ngModel #dataAggregatedTopic="ngModel" [(ngModel)]="config.spec.dataAggregatedTopic"/>
+                        <div class="form-control-feedback">
+                            <small>发送聚合遥测数据的主题。 <i>注意：“车辆识别号 VIN”附加到该主题。 （例如，connectedcar / trip / SAMPLEVIN1234）</ i></small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>遥测传输汇总时间间隔</label>
+                        <input type="text" class="form-control form-control-line" [disabled]="!config.spec.sendAggregatedData" name="aggregationTransmissionTime" id="aggregationTransmissionTime" required ngModel #aggregationTransmissionTime="ngModel" [(ngModel)]="config.spec.aggregationTransmissionTime"/>
+                        <div class="form-control-feedback">
+                            <small>聚合遥测数据的发送频率（毫秒）。</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- <div class="switch pull-right">
+                    <label>Disabled<input type="checkbox" checked [(ngModel)]="config.spec.sendErrorData" [ngModelOptions]="{standalone: true}"><span class="lever"></span>Enabled</label>
+                </div> -->
+                <h4 class="card-title">错误数据</h4>
+                <h6 class="card-subtitle">自定义诊断故障代码如何发送到AWS IoT。</h6>
+                <form class="fm-t-40">
+                    <div class="form-group">
+                        <label>错误 (DTC) 主题</label>
+                        <input type="text" class="form-control form-control-line" [disabled]="!config.spec.sendErrorData" name="errorTopic" id="errorTopic" required ngModel #errorTopic="ngModel" [(ngModel)]="config.spec.errorTopic"/>
+                        <div class="form-control-feedback">
+                            <small>诊断故障代码数据发送到的主题。 <i>注意：“车辆识别号”附加到该主题。 （例如，connectedcar / telemetry / SAMPLEVIN1234）</i></small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div>
+                    <button type="button" class="btn btn-success-alt btn-rounded m-r-15" (click)="save()">保存</button>
+                    <button type="button" class="btn btn-secondary btn-rounded" (click)="cancel()">取消</button>
+                    <div class="alert alert-danger m-t-20" *ngIf="errors.length > 0">
+                        <h3 class="text-danger"><i class="fa fa-exclamation-circle"></i> Oops! 您的配置出现问题。</h3>
+                        <ul>
+                            <li *ngFor="let err of errors">
+                                {{err}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->

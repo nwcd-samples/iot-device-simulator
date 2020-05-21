@@ -1,0 +1,243 @@
+<!-- ============================================================== -->
+<!-- Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+        <h3 id="view-title">{{title}}</h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/securehome">首页</a></li>
+            <li class="breadcrumb-item active">车队</li>
+        </ol>
+    </div>
+    <div class="col-md-7 col-4 align-self-center">
+        <div class="d-flex m-t-10 justify-content-end">
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>设备</small></h6>
+                    <h4 class="m-t-0 text-success">总数 {{deviceStats.total}} </h4></div>
+            </div>
+            <div class="d-flex m-r-20 m-l-10 hidden-md-down">
+                <div class="chart-text m-r-10">
+                    <h6 class="m-b-0"><small>仿真</small></h6>
+                    <h4 class="m-t-0 text-success-alt">运行中 {{deviceStats.simulations}}</h4></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- End Bread crumb and right sidebar toggle -->
+<!-- ============================================================== -->
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="clearfix">
+                    <button type="button" class="btn btn-sm btn-success" (click)="openVehicleAddModal()"><i class="mdi mdi-plus"></i> 增加车辆</button>
+                    <button type="button" class="btn btn-sm btn-warning" (click)="customize()"><i class="mdi mdi-car-wash"></i> 配置</button>
+                </div>
+                <!-- .modal -->
+                <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel1">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="exampleModalLabel1">创建汽车</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <form name="vehiclesForm" #f="ngForm" class="form-control-line" (ngSubmit)="addVehicles(f.value)" novalidate>
+                                    <div class="form-group">
+                                        <label for="vehicles" class="form-control-label">需要创建的汽车数量:</label>
+                                        <input type="number" class="form-control form-control-line" onkeypress='return event.charCode >= 48 && event.charCode <= 57' name="count" id="count" required ngModel #count="ngModel" [(ngModel)]="widgetRequest.count" min="1">
+                                        <div class="form-control-feedback">
+                                            <small>需要创建的汽车数量，一次最多不超过100</small>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-danger" *ngIf="provisionCountError">
+                                        <h3 class="text-danger"><i class="fa fa-exclamation-circle"></i> 哎呀!</h3> 一次创建的汽车数量需要小于等于100.
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" (click)="cancelAddVehicles(f);">取消</button>
+                                <button type="submit" class="btn btn-success"  (click)="addVehicles(widgetRequest);">提交</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- .modal -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
+<div class="row">
+    <!-- Column -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-row">
+                    <div class="round round-lg align-self-center round-muted"><i class="mdi mdi-car"></i></div>
+                    <div class="m-l-10 align-self-center">
+                        <h3 class="m-b-0 font-light">{{metrics.total}}</h3>
+                        <h5 class="text-muted m-b-0">车辆总数</h5></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Column -->
+    <!-- Column -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-row">
+                    <div class="round round-lg align-self-center round-success-alt"><i class="mdi mdi-car"></i></div>
+                    <div class="m-l-10 align-self-center">
+                        <h3 class="m-b-0 font-lgiht">{{metrics.hydrated}}</h3>
+                        <h5 class="text-muted m-b-0">运行中</h5></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Column -->
+    <!-- Column -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-row">
+                    <div class="round round-lg align-self-center round-warning"><i class="mdi mdi-car"></i></div>
+                    <div class="m-l-10 align-self-center">
+                        <h3 class="m-b-0 font-lgiht">{{metrics.stopping}}</h3>
+                        <h5 class="text-muted m-b-0">正在停止</h5></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Column -->
+    <!-- Column -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-row">
+                    <div class="round round-lg align-self-center round-danger"><i class="mdi mdi-car"></i></div>
+                    <div class="m-l-10 align-self-center">
+                        <h3 class="m-b-0 font-lgiht">{{metrics.sleeping}}</h3>
+                        <h5 class="text-muted m-b-0">已停止</h5></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Column -->
+</div>
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">筛选</h4>
+                <div class="m-t-20">
+                    <form name="filterForm" #f="ngForm">
+                        <div class="row m-0">
+                            <div class="col-xs-12 col-md-4">
+                                <div class="form-group">
+                                    <label for="stage" class="form-control-label">状态:</label>
+                                    <select class="form-control" name="stage" id="stage" required ngModel #stage="ngModel" [(ngModel)]="filter.stage">
+                                        <option *ngFor="let s of filterStages" [value]="s"> {{s}}</option>
+                                    </select>
+                                </div>
+                            </div>                            
+                            <div class="col-xs-12 col-md-4">
+                                <label for="deviceId" class="form-control-label">车辆 ID:</label>
+                                <input type="text" class="form-control" name="deviceId" id="deviceId" required ngModel #deviceId="ngModel" [(ngModel)]="filter.deviceId">
+                            </div>
+                        </div>
+                        <button type="submit" class="float-right btn btn-sm btn-success" (click)="search();"><i class="mdi mdi-magnify"></i> 过滤</button>
+                        <button type="submit" class="float-right btn btn-sm btn-success m-r-10" (click)="clear();"><i class="mdi mdi-close"></i> 清除</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- /.modal -->
+                <!-- <h4 class="float-left card-title">Vehicles ({{(pages.current-1)*100}} - {{((pages.current-1)*100) + fleet.length}})</h4> -->
+                <button type="button" class="float-right btn btn-sm btn-success m-l-15" (click)="refreshData()"><i class="fa fa-refresh"></i> 刷新</button>
+                <button type="submit" class="float-right btn btn-sm btn-danger m-l-15" *ngIf="getSelectedCount() === true" (click)="stopSelectedVehicles();"><i class="mdi mdi-stop"></i> 停止汽车</button>
+                <button type="submit" class="float-right btn btn-sm btn-success" *ngIf="getSelectedCount() === true" (click)="startSelectedVehicles();"><i class="mdi mdi-play"></i> 启动汽车</button>
+                <h4 class="card-title">车辆 <span *ngIf="fleet.length > 0">({{((pages.current-1)*100) + 1}} - {{((pages.current-1)*100) + fleet.length}})</span></h4>
+                <div *ngIf="fleet.length > 0" class="m-t-20 m-r-10">
+                    <div class="pull-right">
+                        <button type="button" [class]="pages.current === 0 ? 'btn btn-sm btn-default disabled' : 'btn btn-sm btn-default'" (click)="previousPage()" [disabled]="pages.current === 1"><i class="mdi mdi-chevron-left"></i></button>
+                        <span class="m-l-10 m-r-10">第 {{pages.current}} 页 共 {{pages.total}} 页</span>
+                        <button type="button" [class]="pages.current === (pages.total - 1) ? 'btn btn-sm btn-default disabled' : 'btn btn-sm btn-default'" (click)="nextPage()" [disabled]="pages.current === pages.total"><i class="mdi mdi-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="table-responsive m-t-20">
+                    <table id="fleet-pagination" class="table stylish-table" style="text-transform:uppercase;" data-paging-limit="10">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th><input type="checkbox" id="chk_all" [(ngModel)]="allSelected" class="classic-checkbox" (change)="selectAll()"></th>
+                                <th>车辆</th>
+                                <th class="text-right">状态</th>
+                                <th class="text-right">最近行程</th>
+                                <th class="text-right">行程时间</th>
+                                <th class="text-right">仿真运行次数</th>
+                                <th class="text-right">上次仿真运行时间</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let vehicle of fleet">
+                                <td>
+                                    <span class="round round-light-grey">
+                                        <i class="mdi mdi-car-connected text-normal"></i>
+                                        <div [class]="vehicle.stage === 'hydrated' ? 'notify device success' : (vehicle.stage === 'provisioning' ? 'notify device warning' : 'notify device error')"> <span *ngIf="vehicle.stage !== 'sleeping'" class="heartbit"></span> <span class="point"></span> </div>
+                                    </span>
+                                </td>
+                                <td><input type="checkbox" id="chk_{{vehicle.id}}" class="classic-checkbox" [(ngModel)]="vehicle.isSelected" [ngModelOptions]="{standalone: true}"></td>
+                                <td>
+                                    <h6>{{vehicle.metadata.vin}}</h6><small class="text-muted" style="text-transform:none;">{{vehicle.id}}</small>
+                                </td>
+                                <td class="text-right">
+                                    <span [class]="vehicle.stage === 'hydrated' ? 'label label-light-success-alt' : (vehicle.stage === 'provisioning' ? 'label label-light-primary' : (vehicle.stage === 'stopping' ? 'label label-light-warning' : 'label label-light-danger'))">{{vehicle.stage === 'hydrated' ? 'running' : vehicle.stage}}</span>
+                                </td>
+                                <td class="text-right"><span class="label label-light-inverse">{{vehicle.metadata.route}}</span></td>
+                                <td class="text-right"><span class="label label-muted">{{vehicle.metadata.trip}}</span></td>
+                                <td class="text-right"><span class="label label-success">{{vehicle.runs}}</span></td>
+                                <td class="text-right">{{formatDate(vehicle.lastRunAt)}}</td>
+                                <td>
+                                    <div class="pull-right" role="group" aria-label="Basic example">
+                                        <button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="View Vehicle" data-placement="top" (click)="openDevice(vehicle.id)"><i class="mdi mdi-information"></i> 查看</button>
+                                        <button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Start Simulation" *ngIf="vehicle.stage === 'sleeping'"  (click)="startVehicle(vehicle.id)"><i class="mdi mdi-play"></i> 启动</button>
+                                        <button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Stop Simulation" *ngIf="vehicle.stage === 'hydrated'" (click)="stopVehicle(vehicle.id)"><i class="mdi mdi-stop"></i> 停止</button>
+                                        <button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Delete Vehicle" *ngIf="vehicle.stage === 'sleeping'"  (click)="deleteVehicle(vehicle.id)"><i class="mdi mdi-delete-circle"></i> 删除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot *ngIf="fleet.length > 0">
+                            <tr>
+                                <td colspan="9">
+                                    <div class="text-right">
+                                        <div class="pull-right">
+                                            <button type="button" [class]="pages.current === 0 ? 'btn btn-sm btn-default disabled' : 'btn btn-sm btn-default'" (click)="previousPage()" [disabled]="pages.current === 1"><i class="mdi mdi-chevron-left"></i></button>
+                                            <span class="m-l-10 m-r-10">第 {{pages.current}} 页 共 {{pages.total}} 页</span>
+                                            <button type="button" [class]="pages.current === (pages.total - 1) ? 'btn btn-sm btn-default disabled' : 'btn btn-sm btn-default'" (click)="nextPage()" [disabled]="pages.current === pages.total"><i class="mdi mdi-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
