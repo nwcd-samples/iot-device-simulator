@@ -53,56 +53,31 @@ class Auth {
 
         return new Promise((resolve, reject) => {
             let _self = this;
-            //Get authorizationToken from Authing.cn, verify JWT and return ticket
-            //ticket format
-            //ticket.userid = authing user id
             Logger.log(Logger.levels.INFO, 'Processing Authing token for generation of user claim ticket.');
-            
-            //start to verify the token
-            //[todo] Need to remove this JWT code to Dynamodb
-            // const jwk = {
-            //     "n": "zTAIwLfWzymVYGK5oywDJnqrq8pbMIQAQVYQEtGCYiDct8nknbtvqHg3N31O3n-vhOOIZE26Ybg3dnlN__I5UDjLmSY_cl_Nusvxs3XZFzwpCuSyLzirZ3MT43HLP8HFV3iCeCgN3mNwDO3xJcnqXKzMmLSgNOmSxLdThKXh1a4_TC5gtbT-qmeO1S0yyDD5HNKvgAsRUl6BFXKY3LS-3o2gT9uWwyeX_PeTXtbSebU4Tya1UwMuzlDxvT3kbHRv7zDuVhG5ypBiEXnO04AGeUUAUd5PnuwQum8v1mMCmelcw0oKoMcwTuImCTIhWbPTg_blI8EVFOtvRimAOm8l7Q",
-            //     "e": "AQAB",
-            //     "use": "sig",
-            //     "alg": "RS256",
-            //     "kid": "jjtRhZbXxUmh5ZTCOsD0YpOrM0AyQdoC8xsyfhjLSQ0",
-            //     "kty": "RSA"
-            // };
-            var jwk = JSON.parse(process.env.AuthingRSAsignature.toString());
+            Logger.log(Logger.levels.INFO, 'Start to parse jwks_params...');
+            let jwks_params = JSON.parse(process.env.AuthingRSAsignature.toString());
+            Logger.log(Logger.levels.INFO, 'jwks_params = ' + jwks_params);
 
-            // const request = require('request');
-            // let jwkurl = process.env.AuhtingApplicationURL+"/.well-known/jwks.json"
-            // console.log(jwkurl);
-            // // let url = "https://iotsimulation.authing.cn/oauth/oidc/.well-known/jwks.json";
-            // let options = {json: true};
-            // var jwk = "";
-            
-            // request(jwkurl, options, (error, res, body) => {
-            //     if (error) {
-            //         return  console.log(error);
-            //     };
-            
-            //     if (!error && res.statusCode == 200) {
-            //         // do something with JSON, using the 'body' variable
-            //         jwk=body.keys[0];
-            //         console.log(jwk);
-            //     };
-            // });
+            const keystore = jose.JWKS.asKeyStore(jwks_params);
+            Logger.log(Logger.levels.INFO, 'keystore = ' + keystore);
 
-            var key = jose.JWK.asKey(jwk)
-            console.log('Key thumbprint: ' + key.thumbprint);
-            var pem = jwkToPem(jwk);
-            console.log('PEM: ' + pem)
+            Logger.log(Logger.levels.INFO, 'process.env.AuthingAppUrl = ' + process.env.AuhtingApplicationURL);
+            Logger.log(Logger.levels.INFO, 'process.env.AuthingAppId = ' + process.env.AuthingAppId);
+
+            const decoded = jose.JWT.IdToken.verify(
+                authorizationToken,
+                keystore,
+                {
+                    issuer: process.env.AuhtingApplicationURL,
+                    audience: process.env.AuthingAppId,
+                }
+            );
+            Logger.log(Logger.levels.INFO, 'decoded = ' + decoded.toString());
 
 
-            //从Authing.cn控制台获取OIDC应用的App Secret并存入在Lambda环境变量中            
-            const decoded = jwt.verify(authorizationToken, pem, {algorithms: ['RS256'] }); 
-            console.log('Decoded token: ' + decoded)
-            console.log('Decoded token string'+decoded.toString())
-            console.log('sub'+decoded.sub.toString())
             try {
                 const expired = (Date.parse(new Date()) / 1000) > decoded.exp
-            
+
                 let ticket = {
                     auth_status : 'validated',
                     auth_status_reason : 'User is a valid entity from Authing',
@@ -125,64 +100,6 @@ class Auth {
                 console.log(error);
                 reject("Error: Invalid token"); // Return a 500 Invalid token response
             }
-
-            // this._getUserPoolConfigInfo().then((poolinfo) => {
-
-            //     let iss = 'https://cognito-idp.' + process.env.AWS_REGION + '.amazonaws.com/' + poolinfo;
-
-            //     Logger.log(Logger.levels.INFO, 'Processing UI token for generation of user claim ticket.');
-            //     if (!pems) {
-            //         //Download the JWKs and save it as PEM
-            //         request({
-            //             url: iss + '/.well-known/jwks.json',
-            //             json: true
-            //         }, function (error, response, body) {
-            //             if (!error && response.statusCode === 200) {
-            //                 pems = {};
-            //                 let keys = body['keys'];
-            //                 for (let i = 0; i < keys.length; i++) {
-            //                     //Convert each key to PEM
-            //                     let keyId = keys[i].kid;
-            //                     let modulus = keys[i].n;
-            //                     let exponent = keys[i].e;
-            //                     let keyType = keys[i].kty;
-            //                     let jwk = {
-            //                         kty: keyType,
-            //                         n: modulus,
-            //                         e: exponent
-            //                     };
-            //                     let pem = jwkToPem(jwk);
-            //                     pems[keyId] = pem;
-            //                 }
-
-            //                 //Now continue with validating the token
-            //                 _self._validateToken(authorizationToken, poolinfo, iss).then((ticket) => {
-            //                     resolve(ticket);
-            //                 }).catch((err) => {
-            //                     Logger.error(1, err.message);
-            //                     Logger.error(1, 'Error occurred while validating authorization token to generate claim ticket.');
-            //                     reject(err);
-            //                 });
-            //             } else {
-            //                 //Unable to download JWKs, fail the call
-            //                 return cb('Unable to download JWKs', null);
-            //             }
-            //         });
-            //     } else {
-            //         //PEMs are already downloaded, continue with validating the token
-            //         _self._validateToken(authorizationToken, poolinfo, iss).then((ticket) => {
-            //             resolve(ticket);
-            //         }).catch((err) => {
-            //             Logger.error(1, err.message);
-            //             Logger.error(1, 'Error occurred while validating authorization token to generate claim ticket.');
-            //             reject(err);
-            //         });
-            //     }
-            // }).catch((err) => {
-            //     Logger.error(Logger.levels.INFO, err.message);
-            //     Logger.error(Logger.levels.INFO, 'Error occurred while attempting to retrieve user pool config info.');
-            //     reject(err);
-            // });
 
         });
 

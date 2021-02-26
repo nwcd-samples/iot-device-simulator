@@ -4,7 +4,7 @@ Parameters:
     AuthingThumbPrint:
         Type: String
         Description: "Authing CA Thumbprint. If you use Authing as OpenID provider, this value need not to be changed."
-        Default: "e6a3b45b062d509b3382282d196efe97d5956ccb"
+        Default: "48504e974c0dac5b5cd476c8202274b24c8c7172"
 
     AuthingAppName:
         Type: String
@@ -26,11 +26,11 @@ Parameters:
         Type: String
         Description: "Atuhing OIDC App Secret. Example: a2d5eba65b1b614a50db1ade61f50e4b"
 
-  
+
     AuthingRSAsignature:
         Type: String
         Description: "Authing RSA signature Example: { \"n\": \"zTAIwLfWzymVYGK5oywDJnqrq8pbMIQAQVYQEtGCYiDct8nknbtvqHg3N31O3n-vhOOIZE26Ybg3dnlN__I5UDjLmSY_cl_Nusvxs3XZFzwpCuSyLzirZ3MT43HLP8HFV3iCeCgN3mNwDO3xJcnqXKzMmLSgNOmSxLdThKXh1a4_TC5gtbT-qmeO1S0yyDD5HNKvgAsRUl6BFXKY3LS-3o2gT9uWwyeX_PeTXtbSebU4Tya1UwMuzlDxvT3kbHRv7zDuVhG5ypBiEXnO04AGeUUAUd5PnuwQum8v1mMCmelcw0oKoMcwTuImCTIhWbPTg_blI8EVFOtvRimAOm8l7Q\", \"e\": \"AQAB\",\"use\": \"sig\", \"alg\": \"RS256\", \"kid\": \"jjtRhZbXxUmh5ZTCOsD0YpOrM0AyQdoC8xsyfhjLSQ0\",\"kty\": \"RSA\"}"
-      
+
 
     MapxToken:
         Type: String
@@ -38,7 +38,7 @@ Parameters:
 
 
 
-        
+
 Metadata:
     AWS::CloudFormation::Interface:
         ParameterGroups:
@@ -196,7 +196,7 @@ Resources:
                                           ":",
                                           Ref: "AWS::AccountId",
                                           ":table/*",
-                                          
+
                                       ],
                                   ]
                           - Effect: "Allow"
@@ -302,7 +302,7 @@ Resources:
                                     Ref: SettingsTable,
                                 ],
                             ]
-                    #[Note: Remove cognito userpool] 
+                    #[Note: Remove cognito userpool]
                     # - Effect: "Allow"
                     #   Action:
                     #       - "cognito-idp:AdminGetUser"
@@ -370,7 +370,7 @@ Resources:
             Roles:
                 - Ref: "IotDeviceSimOpenIDTokenRole"
 
-                
+
     IotDeviceSimAdminRole:
         Type: "AWS::IAM::Role"
         Properties:
@@ -1553,7 +1553,7 @@ Resources:
                                 contentHandling: "CONVERT_TO_TEXT"
                                 type: "aws_proxy"
                                 credentials: !GetAtt IotDeviceSimApiLambdaExecRole.Arn
-       
+
                 #[Note]: Remove Cognito user pool
                 # securityDefinitions:
                 #     iot-sim-authorizer:
@@ -1920,7 +1920,7 @@ Resources:
                 # AUTHING_APPREDIRECTURL: !Ref AuthingAppRedirectUrl
                 AUTHING_APPREDIRECTURL: !Sub
                     - "http://${WebSiteBucketName}.s3-website.${AWS::Region}.amazonaws.com.cn/home/login"
-                    - { WebSiteBucketName: !Ref IotSimWebsiteBucket } 
+                    - { WebSiteBucketName: !Ref IotSimWebsiteBucket }
 
                 AUTHING_OIDC: !Ref AuthingAppOidc
                 MAPX_TOKEN: !Ref  MapxToken
@@ -2156,7 +2156,7 @@ Resources:
                 - value: !GetAtt IotDeviceSimIAMCognitoIdentityPool.CognitoIdentityPoolID
             cognitorolarn:
                 - value: !GetAtt IotDeviceSimIdentityPoolAuthRole.Arn
-            customAction: "AttachCognitoIdentityrole"    
+            customAction: "AttachCognitoIdentityrole"
     # Custom resources [end]
 
     # Microservices [start]
@@ -2239,6 +2239,7 @@ Resources:
                     SETTINGS_TBL: !Ref SettingsTable
                     LOGGING_LEVEL: 2
                     AuhtingApplicationURL: !Ref AuthingAppUrl
+                    AuthingAppId: !Ref AuthingAppId
                     AuthingRSAsignature: !Ref  AuthingRSAsignature
 
     IotDeviceSimProfileService:
@@ -2278,6 +2279,7 @@ Resources:
                     SETTINGS_TBL: !Ref SettingsTable
                     LOGGING_LEVEL: 2
                     AuhtingApplicationURL: !Ref AuthingAppUrl
+                    AuthingAppId: !Ref AuthingAppId
                     AuthingRSAsignature: !Ref  AuthingRSAsignature
 
     IotDeviceSimMetricsService:
@@ -2318,6 +2320,7 @@ Resources:
                     LOGGING_LEVEL: 2
                     METRICS_TBL: !Ref MetricsTable
                     AuhtingApplicationURL: !Ref AuthingAppUrl
+                    AuthingAppId: !Ref AuthingAppId
                     AuthingRSAsignature: !Ref  AuthingRSAsignature
 
     IotDeviceSimDeviceService:
@@ -2360,6 +2363,7 @@ Resources:
                     DEVICES_TBL: !Ref DeviceWidgetsTable
                     SIMULATOR_QUEUE: !Ref IotDeviceSimQueue
                     AuhtingApplicationURL: !Ref AuthingAppUrl
+                    AuthingAppId: !Ref AuthingAppId
                     AuthingRSAsignature: !Ref  AuthingRSAsignature
 
     IotDeviceSimHelper:
